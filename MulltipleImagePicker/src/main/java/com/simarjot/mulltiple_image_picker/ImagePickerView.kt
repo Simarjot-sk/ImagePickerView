@@ -12,38 +12,27 @@ import com.simarjot.mulltiple_image_picker.utils.dpToPx
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import com.zhihu.matisse.engine.impl.GlideEngine
+import java.util.*
 
-const val DEFAULT_IMAGE_COUNT = 5
-const val IMAGE_PICKER_REQUEST_CODE = 445
+class ImagePickerView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyle: Int = 0
+) : HorizontalScrollView(context, attrs, defStyle) {
 
-class ImagePickerView : HorizontalScrollView {
+    companion object {
+        const val DEFAULT_IMAGE_COUNT = 5
+        const val IMAGE_PICKER_REQUEST_CODE = 445
+    }
+
     private var maxSelectable = DEFAULT_IMAGE_COUNT
     private lateinit var linearLayout: LinearLayout
+    private val _selectedUris = LinkedList<Uri>()
+    val selectedUris
+        get() = _selectedUris.toList()
+    var addImagesButtonClickListener: ((ImagePickerView) -> Unit)? = null
 
-    private var mFragment: Fragment? = null
-    val selectedUris = mutableListOf<Uri>()
-
-    fun initialize(fragment: Fragment) {
-        mFragment = fragment
-    }
-
-    constructor(context: Context) : super(context) {
-        init(context, null, 0)
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(context, attrs, 0)
-    }
-
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(
-        context,
-        attrs,
-        defStyle
-    ) {
-        init(context, attrs, defStyle)
-    }
-
-    private fun init(context: Context, attrs: AttributeSet?, defStyle: Int) {
+    init {
         //inflate the layout
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.view_image_picker, this)
@@ -60,21 +49,25 @@ class ImagePickerView : HorizontalScrollView {
         val addImageButton = findViewById<ImageButton>(R.id.add_image_button)
 
         addImageButton.setOnClickListener {
-            val selectableCount = maxSelectable - selectedUris.size
-            if (selectableCount > 0) {
-                Matisse.from(mFragment)
-                    .choose(MimeType.ofImage())
-                    .imageEngine(GlideEngine())
-                    .showPreview(false)
-                    .maxSelectable(selectableCount)
-                    .forResult(IMAGE_PICKER_REQUEST_CODE)
-            } else {
-                Toast.makeText(
-                    context,
-                    "You can only select upto $maxSelectable media files.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+            addImagesButtonClickListener?.invoke(this)
+        }
+    }
+
+    fun startPickerActivity(fragment: Fragment, requestCode: Int = IMAGE_PICKER_REQUEST_CODE) {
+        val selectableCount = maxSelectable - _selectedUris.size
+        if (selectableCount > 0) {
+            Matisse.from(fragment)
+                .choose(MimeType.ofImage())
+                .imageEngine(GlideEngine())
+                .showPreview(false)
+                .maxSelectable(selectableCount)
+                .forResult(requestCode)
+        } else {
+            Toast.makeText(
+                context,
+                "You can only select up to $maxSelectable media files.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -94,7 +87,7 @@ class ImagePickerView : HorizontalScrollView {
         view.findViewById<ImageView>(R.id.cross_icon).apply {
             setOnClickListener {
                 linearLayout.removeView(view)
-                selectedUris.remove(uri)
+                _selectedUris.remove(uri)
             }
         }
 
@@ -105,6 +98,6 @@ class ImagePickerView : HorizontalScrollView {
         }
 
         linearLayout.addView(view, layoutParams)
-        selectedUris.add(uri)
+        _selectedUris.add(uri)
     }
 }

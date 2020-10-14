@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.simarjot.mulltiple_image_picker.ImagePickerView
 import kotlinx.android.synthetic.main.fragment_example_picker.*
 
 class ExamplePickerFragment : Fragment() {
@@ -19,7 +18,12 @@ class ExamplePickerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        image_picker.initialize(this)
+        image_picker.addImagesButtonClickListener = {
+            //ask for storage permission
+            ///////////////////////////
+
+            it.startPickerActivity(this)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
