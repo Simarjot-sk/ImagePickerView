@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="ImagePickerView">
+        <attr name="image_count" format="integer" />
+    </declare-styleable>
+</resources>
