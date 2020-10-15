@@ -18,6 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:image_count="7"
+        app:button_icon="@drawable/ic_baseline_library_add_24"
+        app:button_background="@color/colorAccent"
         android:layout_gravity="center"/>
 
 </FrameLayout>

@@ -2,6 +2,7 @@ package com.simarjot.mulltiple_image_picker
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -21,11 +22,12 @@ class ImagePickerView @JvmOverloads constructor(
 ) : HorizontalScrollView(context, attrs, defStyle) {
 
     companion object {
-        const val DEFAULT_IMAGE_COUNT = 5
         const val IMAGE_PICKER_REQUEST_CODE = 445
     }
 
     private var maxSelectable = DEFAULT_IMAGE_COUNT
+    private var buttonBackgroundRes = DEFAULT_BUTTON_BACKGROUND
+    private var buttonIconRes = DEFAULT_BUTTON_ICON
     private lateinit var linearLayout: LinearLayout
     private val _selectedUris = LinkedList<Uri>()
     val selectedUris
@@ -40,16 +42,21 @@ class ImagePickerView @JvmOverloads constructor(
         //load attributes
         val a = context.obtainStyledAttributes(attrs, R.styleable.ImagePickerView, defStyle, 0)
         maxSelectable = a.getInteger(R.styleable.ImagePickerView_image_count, DEFAULT_IMAGE_COUNT)
+        buttonBackgroundRes = a.getResourceId(R.styleable.ImagePickerView_button_background, DEFAULT_BUTTON_BACKGROUND)
+        buttonIconRes = a.getResourceId(R.styleable.ImagePickerView_button_icon, DEFAULT_BUTTON_ICON)
         a.recycle()
     }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
         linearLayout = findViewById(R.id.root_ll)
-        val addImageButton = findViewById<ImageButton>(R.id.add_image_button)
 
-        addImageButton.setOnClickListener {
-            addImagesButtonClickListener?.invoke(this)
+        findViewById<ImageButton>(R.id.add_image_button).apply {
+            setBackgroundResource(buttonBackgroundRes)
+            setImageResource(buttonIconRes)
+            setOnClickListener {
+                addImagesButtonClickListener?.invoke(this@ImagePickerView)
+            }
         }
     }
 
@@ -60,6 +67,7 @@ class ImagePickerView @JvmOverloads constructor(
                 .choose(MimeType.ofImage())
                 .imageEngine(GlideEngine())
                 .showPreview(false)
+                .restrictOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
                 .maxSelectable(selectableCount)
                 .forResult(requestCode)
         } else {

@@ -1,5 +1,7 @@
 <resources>
     <declare-styleable name="ImagePickerView">
         <attr name="image_count" format="integer" />
+        <attr name="button_icon" format="reference"/>
+        <attr name="button_background" format="reference"/>
     </declare-styleable>
 </resources>
